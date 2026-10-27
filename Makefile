@@ -24,7 +24,7 @@ LDLIBS   =
 PREFIX   = /usr/local
 DESTDIR  =
 
-SRCS = src/main.c src/utils/log/log.c
+SRCS = src/main.c src/utils/log/log.c src/utils/path_handler/path_handler.c
 OBJS = $(SRCS:.c=.o)
 BIN  = $(NAME)
 
