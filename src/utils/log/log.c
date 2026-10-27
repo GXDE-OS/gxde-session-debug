@@ -35,7 +35,7 @@
  * @return void
  */
 
-void print_level_prefix(log_level_t level) {
+static void print_level_prefix(log_level_t level) {
     switch (level) {
         case LOG_INFO:
             fprintf(stdout, "%s", BOLD_BLUE_FORMAT);

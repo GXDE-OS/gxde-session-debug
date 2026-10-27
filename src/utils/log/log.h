@@ -94,21 +94,4 @@ void write_log_with_title(log_level_t level, const char* title,
 void write_log_with_tag(log_level_t level, const char* tag, const char* title,
                         const char* content, ...);
 
-/* ---------- Private functions ---------- */
-
-/**
- * @brief Print the colored log level to stdout/stderr.
- * 
- * This is an internal function. It prints the log header (e.g. @c [INFO]) to
- * @c stdout (or @c stderr, if the log level is @c LOG_ERROR.) These headers
- * are colored using ANSI escape codes
- * 
- * @see src/utils/log/ansi_escape_code_def.h for the color definitions.
- *
- * @param level (log_level_t) The log level.
- * @return void
- */
-
-static void print_level_prefix(log_level_t level);
-
 #endif /* LOG_H */

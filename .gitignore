@@ -57,3 +57,5 @@ dkms.conf
 # Project build output
 /gxde-session-debug
 
+# Tests
+tests/process_handler_test

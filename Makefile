@@ -1,46 +1,53 @@
-# Copyright (C) CharOfString <root@charofstring.cc>
+# GXDE Session Debug — build rules (strictly POSIX make)
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Sources are expected under src/. Until src/main.c exists, `make` stops
+# with "no rule to make target" — that file is implementation step 1.
 
 .POSIX:
 
 NAME     = gxde-session-debug
 CC       = cc
 CFLAGS   = -O2 -std=c11 -pedantic -Wall -Wextra
-CPPFLAGS = -Isrc/utils/log
+CPPFLAGS = -D_POSIX_C_SOURCE=200809L -Isrc/utils/log \
+           -Isrc/utils/process_handler
 LDFLAGS  =
 LDLIBS   =
 PREFIX   = /usr/local
 DESTDIR  =
 
-SRCS = src/main.c src/utils/log/log.c src/utils/path_handler/path_handler.c
+SRCS = src/main.c \
+       src/utils/log/log.c \
+       src/utils/process_handler/process_handler.c
 OBJS = $(SRCS:.c=.o)
 BIN  = $(NAME)
+
+TEST_BIN  = tests/process_handler_test
+TEST_SRCS = tests/process_handler_test.c
+TEST_OBJS = $(TEST_SRCS:.c=.o) \
+            src/utils/log/log.o \
+            src/utils/process_handler/process_handler.o
 
 all: $(BIN)
 
 $(BIN): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
+$(TEST_BIN): $(TEST_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
+
 .c.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 # POSIX make has no automatic header dependencies; list them by hand.
 src/utils/log/log.o: src/utils/log/log.h src/utils/log/ansi_escape_code_def.h
+src/utils/process_handler/process_handler.o: \
+	src/utils/process_handler/process_handler.h src/utils/log/log.h
+
+check: $(TEST_BIN)
+	./$(TEST_BIN)
 
 clean:
-	rm -f $(OBJS) $(BIN)
+	rm -f $(OBJS) $(TEST_OBJS) $(BIN) $(TEST_BIN)
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
