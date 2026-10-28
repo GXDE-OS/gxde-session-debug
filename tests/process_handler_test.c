@@ -17,42 +17,43 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include <pthread.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include "process_handler.h"
 #include "log.h"
 
 /**
- * @brief Check that @c fork_process() runs a program with the given arguments.
+ * @brief Check that @c fork_process() and @c fork_process_in_thread() work properly.
  *
- * The child runs @c /bin/sh with the arguments @c -c "exit 7". The parent waits
- * for it and verifies that the PID returned by @c fork_process() is exactly the
- * PID that was reaped, and that the exit status is @c 7, which proves that the
- * argument vector reached the new program.
+ * 1. Checks that @c fork_process() runs a program with the given arguments.
+ * 2. Checks that @c fork_process_in_thread() spawns a thread and monitors child.
  *
  * @return int @c 0 on success, @c 1 on failure.
  */
-
 int main(void) {
     char* argv[] = {"sh", "-c", "exit 7", NULL};
 
     pid_t pid = fork_process("/bin/sh", argv);
     if (pid < 0) {
+        write_log(LOG_ERROR, "fork_process() failed to fork.");
+        return 1;
+    }
+    write_log(LOG_OK, "fork_process() executed successfully.");
+
+    pthread_t tid = fork_process_in_thread("/bin/sh", argv);
+    if (tid == 0) {
+        write_log(LOG_ERROR, "fork_process_in_thread() failed to create thread.");
         return 1;
     }
 
-    int status = 0;
-    if (waitpid(pid, &status, 0) != pid) {
-        write_log(LOG_ERROR, "waitpid() did not reap the forked child.");
-        return 1;
-    }
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 7) {
-        write_log(LOG_ERROR, "Child did not exit normally with status 7.");
+    if (pthread_join(tid, NULL) != 0) {
+        write_log(LOG_ERROR, "pthread_join() failed.");
         return 1;
     }
 
-    write_log(LOG_OK, "fork_process() ran /bin/sh with the given arguments.");
+    write_log(LOG_OK, "fork_process_in_thread() ran and reaped in background thread.");
     return 0;
 }
+

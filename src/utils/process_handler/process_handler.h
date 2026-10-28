@@ -18,9 +18,8 @@
 #ifndef PROCESS_HANDLER_H
 #define PROCESS_HANDLER_H
 
+#include <pthread.h>
 #include <sys/types.h>
-
-/* ---------- Public functions ---------- */
 
 /**
  * @brief Fork a process & run a program specified in the child process.
@@ -37,4 +36,21 @@
  */
 pid_t fork_process(const char* program, char* argv[]);
 
+/**
+ * @brief Spawn a dedicated background thread to fork and monitor a program.
+ *
+ * This function duplicates all required arguments into heap memory, launches
+ * a detached POSIX thread to execute @c fork_process(), and frees all resources
+ * upon thread termination, ensuring non-blocking behavior and memory safety.
+ *
+ * @param program (const char*) Path of the desired program, or the program
+ *                              name if the desired program exists in PATH.
+ * @param argv (char* [])  A vector for program argument. It needs to be
+ *                              NULL-ended. Passing NULL here defaults to
+ *                              executing the program with argv[0] = program.
+ * @return pthread_t The created thread identifier, or @c 0 on failure.
+ */
+pthread_t fork_process_in_thread(const char* program, char* argv[]);
+
 #endif /* PROCESS_HANDLER_H */
+

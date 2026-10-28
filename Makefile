@@ -7,10 +7,10 @@
 
 NAME     = gxde-session-debug
 CC       = cc
-CFLAGS   = -O2 -std=c11 -pedantic -Wall -Wextra
+CFLAGS   = -O2 -std=c11 -pedantic -Wall -Wextra -pthread
 CPPFLAGS = -D_POSIX_C_SOURCE=200809L -Isrc/utils/log \
            -Isrc/utils/process_handler
-LDFLAGS  =
+LDFLAGS  = -pthread
 LDLIBS   =
 PREFIX   = /usr/local
 DESTDIR  =
