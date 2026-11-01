@@ -60,3 +60,11 @@ dkms.conf
 # Tests
 tests/process_handler_test
 tests/session_handler_test
+
+# Debian packaging build output
+/debian/.debhelper/
+/debian/gxde-session-debug/
+/debian/debhelper-build-stamp
+/debian/files
+/debian/*.substvars
+/debian/*.debhelper.log

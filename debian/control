@@ -1,0 +1,16 @@
+Source: gxde-session-debug
+Section: devel
+Priority: optional
+Maintainer: CharOfString <root@charofstring.cc>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/GXDE-OS/gxde-session-debug
+Vcs-Browser: https://github.com/GXDE-OS/gxde-session-debug
+Vcs-Git: https://github.com/GXDE-OS/gxde-session-debug.git
+
+Package: gxde-session-debug
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: dbus-bin | dbus
+Description: Nested debug session launcher for GXDE.

@@ -1,0 +1,5 @@
+gxde-session-debug (0.1.0) unstable; urgency=medium
+
+  * Initial Debian packaging.
+
+ -- CharOfString <root@charofstring.cc>  Sun, 01 Nov 2026 12:00:00 -0600

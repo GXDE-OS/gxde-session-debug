@@ -4,16 +4,27 @@
 
 NAME     = gxde-session-debug
 CC       = cc
-CFLAGS   = -O2 -std=c11 -pedantic -Wall -Wextra -pthread
-CPPFLAGS = -D_POSIX_C_SOURCE=200809L \
-           -Isrc/utils/log \
-           -Isrc/utils/process_handler \
-           -Isrc/session_handler \
-           -Isrc/menu
-LDFLAGS  = -pthread
+CFLAGS   = -O2
+CPPFLAGS =
+LDFLAGS  =
 LDLIBS   =
+
 PREFIX   = /usr/local
 DESTDIR  =
+
+# Flags the project cannot build without. They are kept apart from the
+# user-overridable CFLAGS/CPPFLAGS/LDFLAGS above, so packagers (e.g. the
+# Debian build, which passes dpkg-buildflags on the command line) can
+# replace those without dropping the language standard, POSIX feature
+# macro, include paths, warnings, or pthread support.
+ALL_CFLAGS   = -std=c11 -pedantic -Wall -Wextra -pthread $(CFLAGS)
+ALL_CPPFLAGS = -D_POSIX_C_SOURCE=200809L \
+               -Isrc/utils/log \
+               -Isrc/utils/process_handler \
+               -Isrc/session_handler \
+               -Isrc/menu \
+               $(CPPFLAGS)
+ALL_LDFLAGS  = -pthread $(LDFLAGS)
 
 SRCS = src/main.c \
        src/menu/menu.c \
@@ -38,16 +49,16 @@ TEST_SESSION_OBJS = $(TEST_SESSION_SRCS:.c=.o) \
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(CC) $(ALL_LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 $(TEST_PROCESS_BIN): $(TEST_PROCESS_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(TEST_PROCESS_OBJS) $(LDLIBS)
+	$(CC) $(ALL_LDFLAGS) -o $@ $(TEST_PROCESS_OBJS) $(LDLIBS)
 
 $(TEST_SESSION_BIN): $(TEST_SESSION_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(TEST_SESSION_OBJS) $(LDLIBS)
+	$(CC) $(ALL_LDFLAGS) -o $@ $(TEST_SESSION_OBJS) $(LDLIBS)
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -c -o $@ $<
 
 # POSIX make has no automatic header dependencies; list them by hand.
 src/main.o: src/main.c src/session_handler/session_handler.h src/menu/menu.h \

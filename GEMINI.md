@@ -16,7 +16,8 @@ The repository is in an early, documentation-plus-build-scaffold stage:
 - `src/utils/process_handler/` — process-management module (`process_handler.c`, `process_handler.h`). Currently it provides `fork_process(program, argv)`, which forks and `execvp()`s `program` in the child with the caller-supplied, NULL-terminated argument vector. Only the parent returns, with the child PID; `-1` means the fork failed (logged with `LOG_ERROR`), while a failing `execvp()` is logged and turns into an `EXIT_FAILURE` exit status the parent sees when it waits. `-Isrc/utils/process_handler` is on `CPPFLAGS`.
 - `tests/` — one test program per module, named `<module>_test.c` (`process_handler_test.c` at the moment), run through `make check`.
 - `LICENSE` — GNU GPL-3.0.
-- `.gitignore` — patterns for C/C++ and kernel-module build artifacts (`.o`, `*.ko`, `*.mod*`, `*.dwo`, etc.) and the compiled `gxde-session-debug` binary.
+- `debian/` — Debian packaging (see "Debian package" below).
+- `.gitignore` — patterns for C/C++ and kernel-module build artifacts (`.o`, `*.ko`, `*.mod*`, `*.dwo`, etc.) the compiled `gxde-session-debug` binary, and Debian build output under `debian/`.
 
 `src/main.c` does not exist yet, so `make` still stops early; the modules themselves build cleanly and their tests pass. When introducing code, follow the conventions below.
 
@@ -32,7 +33,18 @@ The build system is a strictly POSIX-compatible Makefile (`.POSIX:` mode, suffix
 
 Variables (`CC`, `CFLAGS`, `CPPFLAGS`, `LDFLAGS`, `LDLIBS`, `PREFIX`, `DESTDIR`) can be overridden on the command line, e.g. `make CFLAGS='-O0 -g'`.
 
-`CPPFLAGS` also carries `-D_POSIX_C_SOURCE=200809L`, because `-std=c11 -pedantic` would otherwise hide the POSIX declarations (`fork()`, `waitpid()`, ...) behind `__STRICT_ANSI__`. Keep that define when overriding `CPPFLAGS`; source files that use POSIX APIs repeat it at the top of the file for the same reason.
+Flags the project cannot build without live in separate `ALL_CFLAGS`, `ALL_CPPFLAGS`, and `ALL_LDFLAGS` variables, which append the user-overridable ones. They carry `-std=c11 -pedantic -Wall -Wextra -pthread`, the include paths, and `-D_POSIX_C_SOURCE=200809L` (needed because `-std=c11 -pedantic` would otherwise hide the POSIX declarations — `fork()`, `waitpid()`, ... — behind `__STRICT_ANSI__`). Overriding `CFLAGS`/`CPPFLAGS`/`LDFLAGS` therefore never drops them. Source files that use POSIX APIs still repeat the define at the top of the file.
+
+### Debian package
+
+`debian/` holds native (`3.0 (native)`) debhelper packaging. Build the `.deb` on Debian/GXDE with:
+
+```sh
+sudo apt install build-essential debhelper
+dpkg-buildpackage -us -uc -b
+```
+
+`debian/rules` passes the `dpkg-buildflags` values (hardening enabled) as `CFLAGS`/`CPPFLAGS`/`LDFLAGS`, installs with `PREFIX=/usr`, and `dh_auto_test` runs `make check`. The package lands in the parent directory. Bump `debian/changelog` (`dch -v <version>`) for each release.
 
 ## Development Conventions
 
