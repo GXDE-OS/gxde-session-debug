@@ -59,3 +59,4 @@ dkms.conf
 
 # Tests
 tests/process_handler_test
+tests/session_handler_test
