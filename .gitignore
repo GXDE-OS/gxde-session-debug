@@ -68,3 +68,9 @@ tests/session_handler_test
 /debian/files
 /debian/*.substvars
 /debian/*.debhelper.log
+
+# Arch Linux packaging build output
+/arch/src/
+/arch/pkg/
+/arch/*.pkg.tar*
+/arch/*.log

@@ -17,7 +17,8 @@ The repository is in an early, documentation-plus-build-scaffold stage:
 - `tests/` — one test program per module, named `<module>_test.c` (`process_handler_test.c` at the moment), run through `make check`.
 - `LICENSE` — GNU GPL-3.0.
 - `debian/` — Debian packaging (see "Debian package" below).
-- `.gitignore` — patterns for C/C++ and kernel-module build artifacts (`.o`, `*.ko`, `*.mod*`, `*.dwo`, etc.) the compiled `gxde-session-debug` binary, and Debian build output under `debian/`.
+- `arch/` — Arch Linux `PKGBUILD` (see "Arch Linux package" below).
+- `.gitignore` — patterns for C/C++ and kernel-module build artifacts (`.o`, `*.ko`, `*.mod*`, `*.dwo`, etc.) the compiled `gxde-session-debug` binary, and the Debian / Arch build output under `debian/` and `arch/`.
 
 `src/main.c` does not exist yet, so `make` still stops early; the modules themselves build cleanly and their tests pass. When introducing code, follow the conventions below.
 
@@ -45,6 +46,17 @@ dpkg-buildpackage -us -uc -b
 ```
 
 `debian/rules` passes the `dpkg-buildflags` values (hardening enabled) as `CFLAGS`/`CPPFLAGS`/`LDFLAGS`, installs with `PREFIX=/usr`, and `dh_auto_test` runs `make check`. The package lands in the parent directory. Bump `debian/changelog` (`dch -v <version>`) for each release.
+
+### Arch Linux package
+
+`arch/PKGBUILD` builds a local Arch package. It has no `source=()` entries and does not check anything out: `prepare()` copies `Makefile`, `LICENSE`, `src/`, and `tests/` from the repository root (`../` relative to the PKGBUILD) into `$srcdir`, so the package reflects the current working tree and the build never writes into the repository. Build it with:
+
+```sh
+cd arch
+makepkg -f
+```
+
+`makepkg`'s `CFLAGS`/`CPPFLAGS`/`LDFLAGS` are passed to `make`, `check()` runs `make check`, and the binary is installed under `/usr`. Keep `pkgver` in sync with `debian/changelog`.
 
 ## Development Conventions
 

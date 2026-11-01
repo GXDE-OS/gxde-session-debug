@@ -1,0 +1,44 @@
+# Maintainer: CharOfString <root@charofstring.cc>
+#
+# Local Arch Linux build. Nothing is fetched or checked out: the sources
+# are copied from the repository root (../ relative to this file), so the
+# package always reflects the current working tree, uncommitted changes
+# included.
+
+pkgname=gxde-session-debug
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Nested session launcher for debugging GXDE desktop sessions'
+arch=('x86_64' 'aarch64' 'riscv64' 'loong64')
+url='https://github.com/GXDE-OS/gxde-session-debug'
+license=('GPL-3.0-or-later')
+depends=('glibc')
+optdepends=('dbus: isolate the session bus via dbus-run-session')
+source=()
+
+# Repository root, i.e. ../ relative to this PKGBUILD.
+_srcroot="$(realpath "$startdir/..")"
+
+prepare() {
+  # Build out of tree so makepkg never writes objects into the repository.
+  rm -rf "$srcdir/$pkgname"
+  mkdir -p "$srcdir/$pkgname"
+  cp -a "$_srcroot"/{Makefile,LICENSE,src,tests} "$srcdir/$pkgname"/
+  # Drop objects left over from a local build in the repository root.
+  make -C "$srcdir/$pkgname" clean
+}
+
+build() {
+  cd "$pkgname"
+  make CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS"
+}
+
+check() {
+  cd "$pkgname"
+  make CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" check
+}
+
+package() {
+  cd "$pkgname"
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+}
